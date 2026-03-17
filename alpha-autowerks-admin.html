@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin – Alpha Autowerks</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@400;600;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --red:#E8001D;--red2:#ff1a35;--black:#070707;--dark:#0e0e0e;
+    --dark2:#141414;--dark3:#1c1c1c;--grey:#2a2a2a;--mid:#666;
+    --light:#aaa;--white:#f0f0f0;--green:#00c864;--yellow:#FFC107;--blue:#3b82f6;
+    --sw:240px;--fd:'Bebas Neue',sans-serif;--fc:'Barlow Condensed',sans-serif;--fb:'Barlow',sans-serif;
+  }
+  html{scroll-behavior:smooth}
+  body{background:var(--black);color:var(--white);font-family:var(--fb);min-height:100vh}
+  a{text-decoration:none;color:inherit}
+  ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--dark)}
+  ::-webkit-scrollbar-thumb{background:var(--red);border-radius:2px}
+
+  /* LOGIN */
+  #loginScreen{position:fixed;inset:0;z-index:9999;background:var(--black);
+    display:flex;align-items:center;justify-content:center}
+  .login-grid{position:absolute;inset:0;
+    background-image:linear-gradient(rgba(232,0,29,.05) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(232,0,29,.05) 1px,transparent 1px);background-size:50px 50px;
+    mask-image:radial-gradient(ellipse 70% 70% at 50% 50%,black 30%,transparent 100%)}
+  .login-box{position:relative;z-index:1;background:var(--dark2);border:1px solid var(--grey);
+    border-top:3px solid var(--red);padding:48px 40px;width:100%;max-width:400px}
+  .login-logo{display:flex;align-items:center;gap:12px;margin-bottom:32px}
+  .lm{width:40px;height:40px;background:var(--red);
+    clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+    display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:18px;color:#fff;flex-shrink:0}
+  .login-logo .brand{font-family:var(--fd);font-size:18px;letter-spacing:2px}
+  .login-logo .brand em{color:var(--red);font-style:normal}
+  .lf-group{margin-bottom:16px}
+  .lf-group label{display:block;font-family:var(--fc);font-size:11px;font-weight:700;
+    letter-spacing:3px;text-transform:uppercase;color:var(--light);margin-bottom:8px}
+  .lf-group input{width:100%;background:var(--dark3);border:1px solid var(--grey);
+    color:var(--white);padding:12px 14px;font-family:var(--fb);font-size:14px;outline:none;transition:border-color .25s}
+  .lf-group input:focus{border-color:var(--red)}
+  .login-btn{width:100%;background:var(--red);color:#fff;border:none;font-family:var(--fc);
+    font-size:13px;font-weight:700;letter-spacing:3px;text-transform:uppercase;padding:14px;
+    cursor:pointer;transition:background .25s;margin-top:8px;
+    clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px))}
+  .login-btn:hover{background:var(--red2)}
+  .login-error{display:none;margin-top:12px;padding:10px 14px;background:rgba(232,0,29,.1);
+    border:1px solid rgba(232,0,29,.3);color:var(--red);font-family:var(--fc);font-size:12px;
+    letter-spacing:1px;text-align:center}
+  .login-hint{margin-top:20px;padding:12px;background:var(--dark3);border:1px solid var(--grey);
+    font-size:12px;color:var(--mid);text-align:center;font-family:var(--fc);letter-spacing:1px}
+  .login-hint strong{color:var(--light)}
+
+  /* APP */
+  #app{display:none;min-height:100vh}
+
+  /* SIDEBAR */
+  .sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sw);background:var(--dark);
+    border-right:1px solid var(--grey);display:flex;flex-direction:column;z-index:100;overflow-y:auto}
+  .sb-brand{padding:20px 20px 16px;border-bottom:1px solid var(--grey);display:flex;align-items:center;gap:10px}
+  .sb-brand .lm{width:34px;height:34px;font-size:14px}
+  .sb-name{font-family:var(--fd);font-size:15px;letter-spacing:2px;line-height:1.2}
+  .sb-name em{color:var(--red);font-style:normal}
+  .sb-sub{font-family:var(--fc);font-size:10px;letter-spacing:2px;color:var(--mid);text-transform:uppercase}
+  .sb-section{padding:16px 14px 4px;font-family:var(--fc);font-size:10px;font-weight:700;
+    letter-spacing:3px;text-transform:uppercase;color:var(--mid)}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:10px 16px;margin:2px 8px;
+    color:var(--light);cursor:pointer;transition:all .2s;font-family:var(--fc);font-size:13px;
+    font-weight:600;letter-spacing:1px;text-transform:uppercase;border-left:2px solid transparent}
+  .nav-item i{width:16px;text-align:center;font-size:13px}
+  .nav-item:hover{color:var(--white);background:rgba(255,255,255,.04)}
+  .nav-item.active{color:var(--red);border-left-color:var(--red);background:rgba(232,0,29,.07)}
+  .nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:700;
+    padding:2px 7px;border-radius:10px;font-family:var(--fb)}
+  .sb-footer{margin-top:auto;padding:16px;border-top:1px solid var(--grey)}
+  .logout-btn{width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;
+    background:transparent;border:1px solid var(--grey);color:var(--light);font-family:var(--fc);
+    font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .25s}
+  .logout-btn:hover{border-color:var(--red);color:var(--red)}
+
+  /* MAIN */
+  .main{margin-left:var(--sw);min-height:100vh;background:var(--black)}
+  .topbar{position:sticky;top:0;z-index:50;background:rgba(14,14,14,.95);backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--grey);padding:0 28px;height:56px;
+    display:flex;align-items:center;justify-content:space-between}
+  .tb-left{font-family:var(--fc);font-size:13px;font-weight:700;letter-spacing:3px;
+    text-transform:uppercase;color:var(--light)}
+  .tb-left span{color:var(--red)}
+  .tb-right{display:flex;align-items:center;gap:16px}
+  .tb-time{font-family:var(--fc);font-size:12px;font-weight:600;letter-spacing:2px;color:var(--mid)}
+  .tb-notif{position:relative;width:34px;height:34px;background:var(--dark2);border:1px solid var(--grey);
+    display:flex;align-items:center;justify-content:center;color:var(--light);cursor:pointer;
+    transition:all .25s;font-size:14px}
+  .tb-notif:hover{border-color:var(--red);color:var(--red)}
+  .notif-dot{position:absolute;top:6px;right:6px;width:8px;height:8px;background:var(--red);
+    border-radius:50%;border:2px solid var(--dark2)}
+  .tb-user{display:flex;align-items:center;gap:8px;font-family:var(--fc);font-size:13px;font-weight:700;letter-spacing:1px}
+  .user-avatar{width:32px;height:32px;background:var(--red);border-radius:50%;
+    display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff}
+
+  /* CONTENT */
+  .content{padding:28px}
+  .page{display:none}.page.active{display:block}
+  .ph-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:12px}
+  .page-title{font-family:var(--fd);font-size:36px;letter-spacing:2px;line-height:1}
+  .page-title span{color:var(--red)}
+  .page-sub{font-family:var(--fc);font-size:12px;font-weight:600;letter-spacing:2px;color:var(--mid);text-transform:uppercase;margin-top:4px}
+
+  /* BUTTONS */
+  .btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--fc);font-size:12px;
+    font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:10px 20px;cursor:pointer;border:none;transition:all .25s}
+  .btn-red{background:var(--red);color:#fff}.btn-red:hover{background:var(--red2)}
+  .btn-outline{background:transparent;border:1px solid var(--grey);color:var(--light)}.btn-outline:hover{border-color:var(--red);color:var(--red)}
+  .btn-sm{padding:7px 14px;font-size:11px}
+  .btn-green{background:rgba(0,200,100,.15);border:1px solid rgba(0,200,100,.3);color:var(--green)}.btn-green:hover{background:var(--green);color:#000}
+  .btn-danger{background:rgba(232,0,29,.1);border:1px solid rgba(232,0,29,.3);color:var(--red)}.btn-danger:hover{background:var(--red);color:#fff}
+
+  /* STATS */
+  .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+  .stat-card{background:var(--dark2);border:1px solid var(--grey);padding:24px 20px;position:relative;overflow:hidden;transition:border-color .25s}
+  .stat-card:hover{border-color:rgba(232,0,29,.3)}
+  .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--red)}
+  .sc-icon{width:40px;height:40px;background:rgba(232,0,29,.1);display:flex;align-items:center;justify-content:center;color:var(--red);font-size:16px;margin-bottom:14px}
+  .sc-val{font-family:var(--fd);font-size:40px;letter-spacing:1px;line-height:1;margin-bottom:4px}
+  .sc-lbl{font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--mid)}
+  .sc-change{position:absolute;top:20px;right:20px;font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:1px}
+  .sc-change.up{color:var(--green)}.sc-change.dn{color:var(--red)}
+
+  /* CARD */
+  .card{background:var(--dark2);border:1px solid var(--grey);margin-bottom:20px}
+  .card-hdr{padding:16px 20px;border-bottom:1px solid var(--grey);display:flex;align-items:center;justify-content:space-between}
+  .card-title{font-family:var(--fc);font-size:13px;font-weight:700;letter-spacing:3px;text-transform:uppercase}
+  .card-body{padding:20px}
+
+  /* TABLE */
+  table{width:100%;border-collapse:collapse}
+  th{font-family:var(--fc);font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;
+    color:var(--mid);padding:10px 14px;text-align:left;border-bottom:1px solid var(--grey);background:var(--dark3)}
+  td{padding:12px 14px;font-size:13px;color:var(--light);border-bottom:1px solid rgba(42,42,42,.5);vertical-align:middle}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:rgba(255,255,255,.02);color:var(--white)}
+  .td-name{font-weight:600;color:var(--white)}
+
+  /* BADGES */
+  .badge{display:inline-block;padding:3px 10px;font-family:var(--fc);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase}
+  .badge-new{background:rgba(59,130,246,.15);color:#3b82f6;border:1px solid rgba(59,130,246,.3)}
+  .badge-open{background:rgba(255,193,7,.12);color:var(--yellow);border:1px solid rgba(255,193,7,.3)}
+  .badge-done{background:rgba(0,200,100,.12);color:var(--green);border:1px solid rgba(0,200,100,.3)}
+  .badge-cancel{background:rgba(232,0,29,.12);color:var(--red);border:1px solid rgba(232,0,29,.3)}
+  .badge-hidden{background:rgba(100,100,100,.12);color:var(--mid);border:1px solid rgba(100,100,100,.3)}
+
+  /* FORMS */
+  .form-group{margin-bottom:16px}
+  .form-group label{display:block;font-family:var(--fc);font-size:11px;font-weight:700;
+    letter-spacing:3px;text-transform:uppercase;color:var(--light);margin-bottom:7px}
+  .form-group input,.form-group textarea,.form-group select{
+    width:100%;background:var(--dark3);border:1px solid var(--grey);color:var(--white);
+    padding:10px 12px;font-family:var(--fb);font-size:13px;outline:none;transition:border-color .25s}
+  .form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:var(--red)}
+  .form-group textarea{resize:vertical;min-height:80px}
+  .form-group select option{background:var(--dark3)}
+  .fr2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .fr3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+
+  /* TOAST */
+  #toast{position:fixed;bottom:24px;right:24px;z-index:9999;background:var(--dark2);
+    border:1px solid var(--green);color:var(--green);padding:14px 20px;font-family:var(--fc);
+    font-size:12px;font-weight:700;letter-spacing:2px;display:none;align-items:center;gap:10px;
+    border-left:3px solid var(--green);animation:slideIn .3s ease}
+  #toast.err{border-color:var(--red);color:var(--red);border-left-color:var(--red)}
+  @keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+
+  /* MODAL */
+  .modal-overlay{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.85);
+    backdrop-filter:blur(4px);align-items:center;justify-content:center}
+  .modal-overlay.open{display:flex}
+  .modal{background:var(--dark2);border:1px solid var(--grey);border-top:3px solid var(--red);
+    width:100%;max-width:560px;max-height:90vh;overflow-y:auto}
+  .modal-hdr{padding:20px 24px;border-bottom:1px solid var(--grey);display:flex;align-items:center;justify-content:space-between}
+  .modal-title{font-family:var(--fc);font-size:16px;font-weight:700;letter-spacing:3px;text-transform:uppercase}
+  .modal-close{width:30px;height:30px;background:var(--dark3);border:1px solid var(--grey);
+    color:var(--light);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .2s}
+  .modal-close:hover{border-color:var(--red);color:var(--red)}
+  .modal-body{padding:24px}
+  .modal-footer{padding:16px 24px;border-top:1px solid var(--grey);display:flex;justify-content:flex-end;gap:10px}
+
+  /* GRID */
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+
+  /* BUILD / SERVICE ITEM */
+  .item-box{background:var(--dark3);border:1px solid var(--grey);padding:16px;transition:border-color .25s}
+  .item-box:hover{border-color:rgba(232,0,29,.3)}
+  .item-img{height:100px;background:var(--dark2);display:flex;align-items:center;justify-content:center;font-size:32px;color:rgba(232,0,29,.2);margin-bottom:12px;overflow:hidden}
+  .item-name{font-family:var(--fc);font-size:14px;font-weight:700;letter-spacing:1px;margin-bottom:2px}
+  .item-sub{font-size:12px;color:var(--mid);margin-bottom:12px}
+  .item-actions{display:flex;gap:8px}
+
+  /* REVIEW ITEM */
+  .rev-item{padding:16px;border:1px solid var(--grey);background:var(--dark3);margin-bottom:10px;
+    display:flex;gap:16px;align-items:flex-start;transition:border-color .25s}
+  .rev-item:hover{border-color:rgba(232,0,29,.2)}
+  .rev-avatar{width:40px;height:40px;border-radius:50%;background:rgba(232,0,29,.15);
+    border:2px solid rgba(232,0,29,.2);display:flex;align-items:center;justify-content:center;
+    font-family:var(--fc);font-size:16px;font-weight:700;color:var(--red);flex-shrink:0}
+  .rev-meta{display:flex;align-items:center;gap:12px;margin-bottom:6px;flex-wrap:wrap}
+  .rev-name{font-family:var(--fc);font-size:14px;font-weight:700;letter-spacing:1px}
+  .rev-stars{color:var(--yellow);font-size:12px;letter-spacing:2px}
+  .rev-date{font-size:11px;color:var(--mid)}
+  .rev-text{font-size:13px;color:var(--light);line-height:1.7}
+  .rev-actions{display:flex;gap:6px;margin-top:10px}
+
+  /* ACTIVITY */
+  .act-item{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid rgba(42,42,42,.5)}
+  .act-item:last-child{border-bottom:none}
+  .act-dot{width:10px;height:10px;border-radius:50%;margin-top:5px;flex-shrink:0}
+  .act-dot.r{background:var(--red)}.act-dot.g{background:var(--green)}
+  .act-dot.b{background:var(--blue)}.act-dot.y{background:var(--yellow)}
+  .act-text{font-size:13px;color:var(--light);line-height:1.6}
+  .act-text strong{color:var(--white);font-weight:600}
+  .act-time{font-family:var(--fc);font-size:11px;color:var(--mid)}
+
+  /* CHART */
+  .cb-row{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+  .cb-lbl{font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:1px;color:var(--light);width:90px;text-align:right}
+  .cb-wrap{flex:1;height:24px;background:var(--dark3);position:relative}
+  .cb-bar{height:100%;opacity:.75;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;transition:width .8s cubic-bezier(.25,.46,.45,.94)}
+  .cb-bar span{font-family:var(--fc);font-size:11px;font-weight:700;color:#fff}
+
+  /* SETTINGS */
+  .settings-sec{background:var(--dark2);border:1px solid var(--grey);margin-bottom:20px}
+  .settings-hdr{padding:14px 20px;border-bottom:1px solid var(--grey);font-family:var(--fc);
+    font-size:12px;font-weight:700;letter-spacing:3px;text-transform:uppercase;display:flex;align-items:center;gap:10px}
+  .settings-hdr i{color:var(--red)}
+  .settings-body{padding:20px}
+
+  /* UNREAD DOT */
+  .unread-dot{display:inline-block;width:8px;height:8px;background:var(--red);border-radius:50%;margin-right:6px}
+
+  /* ── TABLE SCROLL (all sizes) ───────────────── */
+  .card-body{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{min-width:600px}
+  td[style*="display:flex"]{display:flex!important;flex-wrap:wrap;gap:4px}
+  .message-cell{max-width:200px;color:var(--mid);font-size:12px;overflow-wrap:break-word;word-break:break-word;line-height:1.4;white-space:normal;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;cursor:pointer;transition:color 0.2s}
+  .message-cell:hover{color:var(--red)}
+
+  /* ── SIDEBAR OVERLAY (mobile drawer backdrop) */
+  .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);
+    z-index:99;backdrop-filter:blur(2px)}
+  .sidebar-overlay.visible{display:block}
+
+  /* ── HAMBURGER injected by JS ─────────────── */
+  .mob-menu-btn{display:none;align-items:center;justify-content:center;
+    width:36px;height:36px;background:var(--dark2);border:1px solid var(--grey);
+    color:var(--light);cursor:pointer;font-size:15px;flex-shrink:0;
+    transition:all .25s;margin-right:10px}
+  .mob-menu-btn:hover{border-color:var(--red);color:var(--red)}
+
+  /* ── 1024px ──────────────────────────────── */
+  @media(max-width:1024px){
+    .stats-row{grid-template-columns:1fr 1fr}
+  }
+
+  /* ── 768px ───────────────────────────────── */
+  @media(max-width:768px){
+    :root{--sw:240px}
+    /* Sidebar becomes off-canvas drawer */
+    .sidebar{transform:translateX(-240px);transition:transform .3s ease;z-index:200}
+    .sidebar.open{transform:translateX(0)}
+    .main{margin-left:0!important}
+    .mob-menu-btn{display:flex}
+    /* Topbar */
+    .topbar{padding:0 14px}
+    .tb-time{display:none}
+    /* Content */
+    .content{padding:16px}
+    /* Grids */
+    .two-col{grid-template-columns:1fr}
+    .three-col{grid-template-columns:1fr 1fr}
+    .stats-row{grid-template-columns:1fr 1fr}
+    .fr2{grid-template-columns:1fr}
+    .fr3{grid-template-columns:1fr 1fr}
+    /* Page header */
+    .ph-bar{flex-direction:column;align-items:flex-start;gap:10px}
+    .page-title{font-size:28px}
+    /* Cards */
+    .card-hdr{flex-wrap:wrap;gap:8px}
+    /* Filter buttons */
+    #page-bookings > div:nth-child(2){gap:6px}
+    /* Modals */
+    .modal{margin:12px;max-height:calc(100vh - 24px)}
+    .modal-body{padding:16px}
+    .modal-footer{padding:12px 16px;gap:8px}
+    .modal-hdr{padding:14px 16px}
+    /* Login box */
+    .login-box{padding:32px 24px;margin:16px}
+    /* Sidebar footer always visible */
+    .sb-footer{padding:12px}
+    /* Item boxes */
+    .item-actions{flex-wrap:wrap}
+    /* Rev actions */
+    .rev-actions{flex-wrap:wrap}
+    /* Toast positioning */
+    #toast{bottom:16px;right:16px;left:16px;font-size:11px}
+  }
+
+  /* ── 520px ───────────────────────────────── */
+  @media(max-width:520px){
+    .stats-row{grid-template-columns:1fr}
+    .three-col{grid-template-columns:1fr}
+    .fr3{grid-template-columns:1fr}
+    /* Table tweaks */
+    th{padding:8px 10px;font-size:9px}
+    td{padding:10px;font-size:12px}
+    /* Chart label narrower */
+    .cb-lbl{width:70px;font-size:10px}
+    /* Topbar right: hide user label text */
+    .tb-user span{display:none}
+    /* Login */
+    .login-box{padding:24px 18px}
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-grid"></div>
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="lm">A</div>
+      <div>
+        <div class="brand"><em>ALPHA</em> AUTOWERKS</div>
+        <div style="font-family:var(--fc);font-size:10px;letter-spacing:3px;color:var(--mid);text-transform:uppercase;">Admin Panel</div>
+      </div>
+    </div>
+    <div style="font-family:var(--fc);font-size:12px;font-weight:700;letter-spacing:4px;color:var(--mid);text-transform:uppercase;margin-bottom:28px;">Sign in to continue</div>
+    <div class="lf-group"><label>Username</label><input type="text" id="loginUser" placeholder="admin" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <div class="lf-group"><label>Password</label><input type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="login-btn" onclick="doLogin()"><i class="fas fa-sign-in-alt"></i> &nbsp;Sign In</button>
+    <div class="login-error" id="loginError"><i class="fas fa-exclamation-circle"></i> &nbsp;Invalid credentials</div>
+    <div class="login-hint">Demo: <strong>admin</strong> / <strong>alpha2025</strong></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <nav class="sidebar" id="sidebar">
+    <div class="sb-brand">
+      <div class="lm">A</div>
+      <div><div class="sb-name"><em>ALPHA</em> AUTOWERKS</div><div class="sb-sub">Admin Panel</div></div>
+    </div>
+    <div class="sb-section">Main</div>
+    <div class="nav-item active" onclick="showPage('dashboard',this)"><i class="fas fa-gauge-high"></i> Dashboard</div>
+    <div class="nav-item" onclick="showPage('bookings',this)"><i class="fas fa-calendar-check"></i> Bookings <span class="nav-badge" id="bkBadge">0</span></div>
+    <div class="nav-item" onclick="showPage('enquiries',this)"><i class="fas fa-envelope"></i> Enquiries <span class="nav-badge" id="enqBadge">0</span></div>
+    <div class="sb-section">Content</div>
+    <div class="nav-item" onclick="showPage('builds',this)"><i class="fas fa-car"></i> Builds</div>
+    <div class="nav-item" onclick="showPage('services',this)"><i class="fas fa-wrench"></i> Services</div>
+    <div class="nav-item" onclick="showPage('reviews',this)"><i class="fas fa-star"></i> Reviews</div>
+    <div class="nav-item" onclick="showPage('gallery',this)"><i class="fas fa-images"></i> Gallery</div>
+    <div class="sb-section">System</div>
+    <div class="nav-item" onclick="showPage('settings',this)"><i class="fas fa-sliders"></i> Settings</div>
+    <div class="sb-footer">
+      <button class="logout-btn" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </div>
+  </nav>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="tb-left">Admin / <span id="pageLabel">Dashboard</span></div>
+      <div class="tb-right">
+        <div class="tb-time" id="clock"></div>
+        <div class="tb-notif"><i class="fas fa-bell"></i><div class="notif-dot" id="notifDot" style="display:none;"></div></div>
+        <div class="tb-user"><div class="user-avatar"><i class="fas fa-user"></i></div><span>Admin</span></div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <div class="ph-bar">
+          <div><div class="page-title">DASH<span>BOARD</span></div><div class="page-sub">Alpha Autowerks Overview</div></div>
+          <button class="btn btn-outline btn-sm" onclick="refreshAll()"><i class="fas fa-rotate-right"></i> Refresh</button>
+        </div>
+        <div class="stats-row" id="dashStats"></div>
+        <div class="two-col">
+          <div class="card">
+            <div class="card-hdr"><div class="card-title">Services This Month</div></div>
+            <div class="card-body">
+              <div class="cb-row"><div class="cb-lbl">Detailing</div><div class="cb-wrap"><div class="cb-bar" style="width:85%;background:var(--red);"><span>17</span></div></div></div>
+              <div class="cb-row"><div class="cb-lbl">Body Shop</div><div class="cb-wrap"><div class="cb-bar" style="width:60%;background:var(--green);"><span>12</span></div></div></div>
+              <div class="cb-row"><div class="cb-lbl">Mechanical</div><div class="cb-wrap"><div class="cb-bar" style="width:70%;background:var(--blue);"><span>14</span></div></div></div>
+              <div class="cb-row"><div class="cb-lbl">Suspension</div><div class="cb-wrap"><div class="cb-bar" style="width:35%;background:var(--yellow);"><span>7</span></div></div></div>
+              <div class="cb-row"><div class="cb-lbl">ECU Tuning</div><div class="cb-wrap"><div class="cb-bar" style="width:20%;background:var(--red);"><span>4</span></div></div></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-hdr"><div class="card-title">Recent Activity</div></div>
+            <div class="card-body" id="activityFeed"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hdr"><div class="card-title">Latest Enquiries</div><button class="btn btn-outline btn-sm" onclick="showPage('enquiries',null)">View All</button></div>
+          <div class="card-body" style="padding:0;"><table><thead><tr><th>From</th><th>Service</th><th>Car</th><th>Message</th><th>Received</th><th>Status</th></tr></thead><tbody id="dashEnquiries"></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- BOOKINGS -->
+      <div class="page" id="page-bookings">
+        <div class="ph-bar">
+          <div><div class="page-title">BOOK<span>INGS</span></div><div class="page-sub">Manage service appointments</div></div>
+          <button class="btn btn-red" onclick="openModal('modalAddBooking')"><i class="fas fa-plus"></i> New Booking</button>
+        </div>
+        <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
+          <button class="btn btn-outline btn-sm" onclick="filterBk('all',this)" style="border-color:var(--red);color:var(--red);">All</button>
+          <button class="btn btn-outline btn-sm" onclick="filterBk('new',this)">New</button>
+          <button class="btn btn-outline btn-sm" onclick="filterBk('open',this)">In Progress</button>
+          <button class="btn btn-outline btn-sm" onclick="filterBk('done',this)">Completed</button>
+          <button class="btn btn-outline btn-sm" onclick="filterBk('cancel',this)">Cancelled</button>
+        </div>
+        <div class="card"><div class="card-body" style="padding:0;"><table><thead><tr><th>ID</th><th>Customer</th><th>Phone</th><th>Service</th><th>Car</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead><tbody id="bookingsBody"></tbody></table></div></div>
+      </div>
+
+      <!-- ENQUIRIES -->
+      <div class="page" id="page-enquiries">
+        <div class="ph-bar">
+          <div><div class="page-title">ENQUI<span>RIES</span></div><div class="page-sub">Messages from your website contact form</div></div>
+        </div>
+        <div class="card"><div class="card-body" style="padding:0;"><table><thead><tr><th>From</th><th>Phone</th><th>Email</th><th>Service</th><th>Car</th><th>Message</th><th>Received</th><th>Actions</th></tr></thead><tbody id="enquiriesBody"></tbody></table></div></div>
+        <p id="noEnquiries" style="display:none;text-align:center;padding:40px;font-family:var(--fc);letter-spacing:2px;color:var(--mid);">NO ENQUIRIES YET — THEY WILL APPEAR HERE WHEN SOMEONE FILLS YOUR CONTACT FORM</p>
+      </div>
+
+      <!-- BUILDS -->
+      <div class="page" id="page-builds">
+        <div class="ph-bar">
+          <div><div class="page-title">BUILDS <span>MANAGER</span></div><div class="page-sub">Edits appear live on the website</div></div>
+          <button class="btn btn-red" onclick="openModal('modalAddBuild')"><i class="fas fa-plus"></i> Add Build</button>
+        </div>
+        <div class="three-col" id="buildsGrid"></div>
+      </div>
+
+      <!-- SERVICES -->
+      <div class="page" id="page-services">
+        <div class="ph-bar">
+          <div><div class="page-title">SERVICES <span>MANAGER</span></div><div class="page-sub">Toggle visibility — changes show on website instantly</div></div>
+          <button class="btn btn-red" onclick="openModal('modalAddService')"><i class="fas fa-plus"></i> Add Service</button>
+        </div>
+        <div class="card"><div class="card-body" style="padding:0;"><table><thead><tr><th>#</th><th>Service Name</th><th>Description</th><th>Visible on Site</th><th>Actions</th></tr></thead><tbody id="servicesBody"></tbody></table></div></div>
+      </div>
+
+      <!-- REVIEWS -->
+      <div class="page" id="page-reviews">
+        <div class="ph-bar">
+          <div><div class="page-title">REVIEWS <span>MANAGER</span></div><div class="page-sub">Publish/hide controls update the website instantly</div></div>
+          <button class="btn btn-red" onclick="openModal('modalAddReview')"><i class="fas fa-plus"></i> Add Review</button>
+        </div>
+        <div id="reviewsList"></div>
+      </div>
+
+      <!-- GALLERY -->
+      <div class="page" id="page-gallery">
+        <div class="ph-bar">
+          <div><div class="page-title">GALLERY <span>MANAGER</span></div><div class="page-sub">Upload and manage workshop photos</div></div>
+          <button class="btn btn-red" onclick="triggerUpload()"><i class="fas fa-upload"></i> Upload Photo</button>
+        </div>
+        <input type="file" id="uploadInput" accept="image/*" style="display:none;" onchange="handleUpload(event)">
+        <div class="three-col" id="galleryGrid"></div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="page" id="page-settings">
+        <div class="ph-bar">
+          <div><div class="page-title">SITE <span>SETTINGS</span></div><div class="page-sub">Business information</div></div>
+          <button class="btn btn-red" onclick="saveSettings()"><i class="fas fa-save"></i> Save All</button>
+        </div>
+        <div class="settings-sec">
+          <div class="settings-hdr"><i class="fas fa-store"></i> Business Information</div>
+          <div class="settings-body">
+            <div class="fr2">
+              <div class="form-group"><label>Business Name</label><input type="text" id="s-name" value="Alpha Autowerks – Auto Performance Shop"></div>
+              <div class="form-group"><label>Phone</label><input type="text" id="s-phone" value="096691 38665"></div>
+            </div>
+            <div class="form-group"><label>Address</label><textarea id="s-addr" style="min-height:60px;">Survey No 232/2, CAT Rd, Village Aheerkhedi, Indore, MP 452012</textarea></div>
+            <div class="fr2">
+              <div class="form-group"><label>Email</label><input type="email" id="s-email" placeholder="info@alphaautowerks.in"></div>
+              <div class="form-group"><label>WhatsApp</label><input type="text" id="s-wa" value="096691 38665"></div>
+            </div>
+          </div>
+        </div>
+        <div class="settings-sec">
+          <div class="settings-hdr"><i class="fas fa-clock"></i> Business Hours</div>
+          <div class="settings-body">
+            <div class="fr3">
+              <div class="form-group"><label>Mon – Fri</label><input type="text" id="s-h1" value="9:00 AM – 7:00 PM"></div>
+              <div class="form-group"><label>Saturday</label><input type="text" id="s-h2" value="9:00 AM – 6:00 PM"></div>
+              <div class="form-group"><label>Sunday</label><input type="text" id="s-h3" value="10:00 AM – 4:00 PM"></div>
+            </div>
+          </div>
+        </div>
+        <div class="settings-sec">
+          <div class="settings-hdr"><i class="fab fa-instagram"></i> Social Media Links</div>
+          <div class="settings-body">
+            <div class="fr2">
+              <div class="form-group"><label>Instagram</label><input type="url" id="s-ig" placeholder="https://instagram.com/alphaautowerks"></div>
+              <div class="form-group"><label>Facebook</label><input type="url" id="s-fb" placeholder="https://facebook.com/alphaautowerks"></div>
+            </div>
+            <div class="fr2">
+              <div class="form-group"><label>YouTube</label><input type="url" id="s-yt" placeholder="https://youtube.com/@alphaautowerks"></div>
+              <div class="form-group"><label>WhatsApp Link</label><input type="url" id="s-walink" placeholder="https://wa.me/919669138665"></div>
+            </div>
+          </div>
+        </div>
+        <div class="settings-sec">
+          <div class="settings-hdr"><i class="fas fa-lock"></i> Admin Password</div>
+          <div class="settings-body">
+            <div class="fr2">
+              <div class="form-group"><label>Current Password</label><input type="password" id="s-cp" placeholder="••••••••"></div>
+              <div class="form-group"><label>New Password</label><input type="password" id="s-np" placeholder="••••••••"></div>
+            </div>
+            <button class="btn btn-outline" onclick="changePassword()"><i class="fas fa-key"></i> Update Password</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- TOAST -->
+<div id="toast"><i class="fas fa-check-circle"></i> <span id="toastMsg">Done</span></div>
+
+<!-- ══ MODALS ══════════════════════════════════════ -->
+
+<!-- Add Booking -->
+<div class="modal-overlay" id="modalAddBooking">
+  <div class="modal">
+    <div class="modal-hdr"><div class="modal-title">New Booking</div><div class="modal-close" onclick="closeModal('modalAddBooking')"><i class="fas fa-times"></i></div></div>
+    <div class="modal-body">
+      <div class="fr2">
+        <div class="form-group"><label>Customer Name</label><input type="text" id="bk-name" placeholder="Full Name"></div>
+        <div class="form-group"><label>Phone</label><input type="tel" id="bk-phone" placeholder="Mobile Number"></div>
+      </div>
+      <div class="form-group"><label>Service</label>
+        <select id="bk-service">
+          <option>Car Detailing</option><option>Denting &amp; Painting</option><option>ECU Tuning</option>
+          <option>Suspension &amp; Brakes</option><option>General Servicing</option><option>Body Shop</option>
+          <option>Engine Diagnostics</option><option>Performance Upgrades</option>
+        </select>
+      </div>
+      <div class="fr2">
+        <div class="form-group"><label>Car Model</label><input type="text" id="bk-car" placeholder="e.g. Honda City 2022"></div>
+        <div class="form-group"><label>Date</label><input type="date" id="bk-date"></div>
+      </div>
+      <div class="form-group"><label>Notes</label><textarea id="bk-notes" placeholder="Any additional details..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalAddBooking')">Cancel</button>
+      <button class="btn btn-red" onclick="addBooking()"><i class="fas fa-plus"></i> Add Booking</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Booking -->
+<div class="modal-overlay" id="modalEditBooking">
+  <div class="modal">
+    <div class="modal-hdr"><div class="modal-title">Edit Booking</div><div class="modal-close" onclick="closeModal('modalEditBooking')"><i class="fas fa-times"></i></div></div>
+    <div class="modal-body">
+      <input type="hidden" id="ebk-id">
+      <div class="fr2">
+        <div class="form-group"><label>Customer Name</label><input type="text" id="ebk-name"></div>
+        <div class="form-group"><label>Phone</label><input type="tel" id="ebk-phone"></div>
+      </div>
+      <div class="form-group"><label>Service</label><input type="text" id="ebk-service"></div>
+      <div class="fr2">
+        <div class="form-group"><label>Car Model</label><input type="text" id="ebk-car"></div>
+        <div class="form-group"><label>Status</label>
+          <select id="ebk-status">
+            <option value="new">New</option><option value="open">In Progress</option>
+            <option value="done">Completed</option><option value="cancel">Cancelled</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalEditBooking')">Cancel</button>
+      <button class="btn btn-red" onclick="saveEditBooking()"><i class="fas fa-save"></i> Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Build -->
+<div class="modal-overlay" id="modalAddBuild">
+  <div class="modal">
+    <div class="modal-hdr"><div class="modal-title" id="buildModalTitle">Add Build</div><div class="modal-close" onclick="closeModal('modalAddBuild')"><i class="fas fa-times"></i></div></div>
+    <div class="modal-body">
+      <input type="hidden" id="bd-id">
+      <div class="fr2">
+        <div class="form-group"><label>Make (Brand)</label><input type="text" id="bd-make" placeholder="e.g. Mahindra"></div>
+        <div class="form-group"><label>Car Model</label><input type="text" id="bd-car" placeholder="e.g. Scorpio N"></div>
+      </div>
+      <div class="form-group"><label>Build Type</label><input type="text" id="bd-type" placeholder="e.g. Body Shop"></div>
+      <div class="form-group"><label>Description</label><textarea id="bd-desc" placeholder="What was done on this car..."></textarea></div>
+      <div class="form-group"><label>Custom Background Image</label><input type="file" id="bd-img" accept="image/*" class="form-control" style="background:var(--dark1);padding:8px;border:1px solid rgba(255,255,255,0.1);border-radius:4px;color:var(--light);"></div>
+      <div class="form-group"><label>Tags (comma separated)</label><input type="text" id="bd-tags" placeholder="Full Respray, Dent Removal, PPF"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalAddBuild')">Cancel</button>
+      <button class="btn btn-red" onclick="saveBuild()"><i class="fas fa-save"></i> Save Build</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Service -->
+<div class="modal-overlay" id="modalAddService">
+  <div class="modal">
+    <div class="modal-hdr"><div class="modal-title" id="svcModalTitle">Add Service</div><div class="modal-close" onclick="closeModal('modalAddService')"><i class="fas fa-times"></i></div></div>
+    <div class="modal-body">
+      <input type="hidden" id="sv-id">
+      <div class="form-group"><label>Service Name</label><input type="text" id="sv-name" placeholder="e.g. Window Tinting"></div>
+      <div class="form-group"><label>Description</label><textarea id="sv-desc" placeholder="Describe the service..."></textarea></div>
+      <div class="form-group"><label>Icon (Font Awesome class)</label><input type="text" id="sv-icon" placeholder="fas fa-tint"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalAddService')">Cancel</button>
+      <button class="btn btn-red" onclick="saveService()"><i class="fas fa-save"></i> Save Service</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Review -->
+<div class="modal-overlay" id="modalAddReview">
+  <div class="modal">
+    <div class="modal-hdr"><div class="modal-title" id="revModalTitle">Add Review</div><div class="modal-close" onclick="closeModal('modalAddReview')"><i class="fas fa-times"></i></div></div>
+    <div class="modal-body">
+      <input type="hidden" id="rv-id">
+      <div class="fr2">
+        <div class="form-group"><label>Reviewer Name</label><input type="text" id="rv-name" placeholder="Customer name"></div>
+        <div class="form-group"><label>Star Rating</label>
+          <select id="rv-rating"><option value="5">5 Stars</option><option value="4">4 Stars</option><option value="3">3 Stars</option><option value="2">2 Stars</option><option value="1">1 Star</option></select>
+        </div>
+      </div>
+      <div class="form-group"><label>Review Text</label><textarea id="rv-text" placeholder="Paste the review text here..."></textarea></div>
+      <div class="form-group"><label>Source</label>
+        <select id="rv-source"><option>Google Review</option><option>Direct Feedback</option><option>WhatsApp</option></select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalAddReview')">Cancel</button>
+      <button class="btn btn-red" onclick="saveReview()"><i class="fas fa-save"></i> Save Review</button>
+    </div>
+  </div>
+</div>
+
+<!-- View Enquiry -->
+<div class="modal-overlay" id="modalViewEnquiry">
+  <div class="modal">
+    <div class="modal-hdr"><div class="modal-title">Enquiry Details</div><div class="modal-close" onclick="closeModal('modalViewEnquiry')"><i class="fas fa-times"></i></div></div>
+    <div class="modal-body" style="padding:30px;">
+      <div style="background:rgba(255,255,255,0.03);padding:20px;border-radius:15px;margin-bottom:25px;border:1px solid var(--border);">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+          <div><label style="color:var(--mid);font-size:10px;text-transform:uppercase;display:block;margin-bottom:4px;letter-spacing:1px;font-weight:700;">Customer</label><div style="font-weight:600;font-size:18px;color:var(--light);" id="enq-view-name"></div></div>
+          <div><label style="color:var(--mid);font-size:10px;text-transform:uppercase;display:block;margin-bottom:4px;letter-spacing:1px;font-weight:700;">Status</label><div id="enq-view-status"></div></div>
+          <div><label style="color:var(--mid);font-size:10px;text-transform:uppercase;display:block;margin-bottom:4px;letter-spacing:1px;font-weight:700;">Phone</label><div id="enq-view-phone" style="color:var(--red);font-weight:500;"></div></div>
+          <div><label style="color:var(--mid);font-size:10px;text-transform:uppercase;display:block;margin-bottom:4px;letter-spacing:1px;font-weight:700;">Email</label><div id="enq-view-email" style="word-break:break-all;color:var(--mid);"></div></div>
+          <div><label style="color:var(--mid);font-size:10px;text-transform:uppercase;display:block;margin-bottom:4px;letter-spacing:1px;font-weight:700;">Service Requested</label><div id="enq-view-service"></div></div>
+          <div><label style="color:var(--mid);font-size:10px;text-transform:uppercase;display:block;margin-bottom:4px;letter-spacing:1px;font-weight:700;">Car Details</label><div id="enq-view-car"></div></div>
+        </div>
+      </div>
+      <div class="form-group"><label style="color:var(--mid);font-size:10px;text-transform:uppercase;display:block;margin-bottom:8px;letter-spacing:1px;font-weight:700;">Detailed Message</label>
+        <div id="enq-view-msg" style="background:var(--dark);padding:25px;border-radius:12px;font-size:15px;line-height:1.7;white-space:pre-wrap;border:1px solid var(--border);color:var(--light);max-height:300px;overflow-y:auto;box-shadow:inset 0 2px 10px rgba(0,0,0,0.5);"></div>
+      </div>
+      <div style="color:var(--mid);font-size:11px;margin-top:15px;text-align:right;" id="enq-view-time"></div>
+    </div>
+    <div class="modal-footer">
+      <div style="display:flex;gap:10px;width:100%;justify-content:flex-end;">
+        <button class="btn btn-outline" id="enq-view-btn-read">Mark as Read</button>
+        <button class="btn btn-green" id="enq-view-btn-book">Convert to Booking</button>
+        <button class="btn btn-danger" id="enq-view-btn-del"><i class="fas fa-trash"></i></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+// SHARED STORE
+// ══════════════════════════════════════════════════════
+const KEYS={bookings:'aa_bookings',enquiries:'aa_enquiries',reviews:'aa_reviews',builds:'aa_builds',services:'aa_services',settings:'aa_settings',gallery:'aa_gallery'};
+function load(k){try{return JSON.parse(localStorage.getItem(k))||null}catch(e){return null}}
+function save(k,v){localStorage.setItem(k,JSON.stringify(v))}
+
+// Seed defaults if main site hasn't run yet
+function seedIfEmpty(){
+  if(!load(KEYS.reviews))save(KEYS.reviews,[
+    {id:1,name:'Anshu Yadav',rating:5,text:'Got my painting and denting work done on my Mahindra Scorpio N by Mr. Divyanshu. Amazing work done with great attention to detail.',source:'Google Review',published:true},
+    {id:2,name:'Shourya Singh Ranawat',rating:5,text:'Excellent work on my car. The team is skilled, professional, and very detail-oriented.',source:'Google Review',published:true},
+    {id:3,name:'Karan Arenja',rating:5,text:'I had my car detailed here and the results were amazing. The staff was friendly and professional.',source:'Google Review',published:true},
+    {id:4,name:'Ashish Mittal',rating:5,text:'Alpha Autowerks is one of the best workshops in Indore. Their attention to detailing is unmatched.',source:'Google Review',published:true},
+    {id:5,name:'Varis Khan',rating:5,text:'For mechanical repairs, general servicing, body shop, and detailing — Alpha Autowerks is the best in Indore.',source:'Google Review',published:true},
+    {id:6,name:'Annal Jain',rating:5,text:'Got my Jeep Compass suspension overhaul done here. Well trained staff and many services under one roof.',source:'Google Review',published:true},
+    {id:7,name:'Sameer Ismat',rating:5,text:'Best place for vehicle service and maintenance in Indore.',source:'Google Review',published:true}
+  ]);
+  if(!load(KEYS.builds))save(KEYS.builds,[
+    {id:1,make:'Mahindra',car:'Scorpio N',type:'Body Shop',desc:'Complete body restoration and professional paint finish.',tags:['Full Body Respray','Dent Removal','Paint Protection'],icon:'fas fa-car-crash',bg:'linear-gradient(135deg,#200505,#0e0e0e)'},
+    {id:2,make:'Maruti Suzuki',car:'Baleno',type:'Service',desc:'Full servicing and comprehensive body shop repairs.',tags:['Full Service','Body Repairs','Paint Correction'],icon:'fas fa-car',bg:'linear-gradient(135deg,#051a0a,#0e0e0e)'},
+    {id:3,make:'Jeep',car:'Compass',type:'Suspension',desc:'Complete suspension rebuild and clutch overhaul.',tags:['Suspension Overhaul','Clutch Rebuild','Wheel Alignment'],icon:'fas fa-truck-monster',bg:'linear-gradient(135deg,#051015,#0e0e0e)'},
+    {id:4,make:'Audi',car:'A3',type:'Performance',desc:'Mechanical servicing and pre-ECU tuning preparation.',tags:['Engine Service','Pre-Tune Prep','Diagnostics'],icon:'fas fa-car-side',bg:'linear-gradient(135deg,#0a0518,#0e0e0e)'}
+  ]);
+  if(!load(KEYS.services))save(KEYS.services,[
+    {id:1,name:'General Car Servicing',desc:'Complete routine maintenance including oil changes, filter replacements, fluid top-ups, and inspection.',icon:'fas fa-oil-can',visible:true},
+    {id:2,name:'Engine Diagnostics',desc:'Advanced OBD-II diagnostics and engine fault analysis.',icon:'fas fa-laptop-code',visible:true},
+    {id:3,name:'Denting & Painting',desc:'Professional panel beating, dent removal, and paint matching.',icon:'fas fa-paint-brush',visible:true},
+    {id:4,name:'Car Detailing',desc:'Ceramic coating, PPF, machine polish, and steam cleaning.',icon:'fas fa-star',visible:true},
+    {id:5,name:'Body Shop Repairs',desc:'Full body restoration — structural repairs, panel replacement, refinishing.',icon:'fas fa-hammer',visible:true},
+    {id:6,name:'Suspension & Brakes',desc:'Complete overhauls, shock absorber replacement, brake servicing.',icon:'fas fa-circle-notch',visible:true},
+    {id:7,name:'Performance Upgrades',desc:'Intake, exhaust, intercooler modifications for NA and turbo vehicles.',icon:'fas fa-rocket',visible:true},
+    {id:8,name:'ECU Tuning',desc:'Custom remapping for power gains, improved throttle response.',icon:'fas fa-microchip',visible:true}
+  ]);
+  if(!load(KEYS.bookings))save(KEYS.bookings,[]);
+  if(!load(KEYS.enquiries))save(KEYS.enquiries,[]);
+  if(!load(KEYS.gallery))save(KEYS.gallery,[
+    {id:1, img:'<i class="fas fa-car-crash"></i>', bg:'linear-gradient(135deg,#1a0505,#0e0e0e)', name:'Scorpio Body Work', type:'Body Shop'},
+    {id:2, img:'<i class="fas fa-spray-can"></i>', bg:'linear-gradient(135deg,#050d1a,#0e0e0e)', name:'Detailing Work', type:'Detailing'},
+    {id:3, img:'<i class="fas fa-tools"></i>', bg:'linear-gradient(135deg,#1a1505,#0e0e0e)', name:'Workshop Interior', type:'Workshop'}
+  ]);
+}
+
+// ── AUTH ──────────────────────────────────────────────
+const CREDS={u:'admin',p:'alpha2025'};
+let adminPass='alpha2025';
+
+function doLogin(){
+  const u=document.getElementById('loginUser').value.trim();
+  const p=document.getElementById('loginPass').value;
+  if(u===CREDS.u&&p===adminPass){
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('app').style.display='block';
+    refreshAll();
+  } else {
+    const err=document.getElementById('loginError');
+    err.style.display='flex';
+    setTimeout(()=>err.style.display='none',3000);
+  }
+}
+function doLogout(){
+  document.getElementById('app').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('loginUser').value='';
+  document.getElementById('loginPass').value='';
+}
+
+// ── NAV ───────────────────────────────────────────────
+const LABELS={dashboard:'Dashboard',bookings:'Bookings',enquiries:'Enquiries',builds:'Builds',services:'Services',reviews:'Reviews',gallery:'Gallery',settings:'Settings'};
+function showPage(id,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if(el) el.classList.add('active');
+  document.getElementById('pageLabel').textContent=LABELS[id]||id;
+  window.scrollTo(0,0);
+  // render relevant page
+  if(id==='dashboard') renderDashboard();
+  if(id==='bookings')  renderBookings();
+  if(id==='enquiries') renderEnquiries();
+  if(id==='builds')    renderBuildsAdmin();
+  if(id==='services')  renderServicesAdmin();
+  if(id==='reviews')   renderReviewsAdmin();
+  if(id==='gallery')   renderGalleryAdmin();
+}
+
+// ── CLOCK ─────────────────────────────────────────────
+function updateClock(){document.getElementById('clock').textContent=new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})}
+updateClock(); setInterval(updateClock,1000);
+
+// ── TOAST ─────────────────────────────────────────────
+let toastTimer;
+function showToast(msg,isErr=false){
+  const t=document.getElementById('toast');
+  document.getElementById('toastMsg').textContent=msg;
+  t.className=isErr?'err':'';
+  t.style.display='flex';
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.style.display='none',3500);
+}
+
+// ── MODAL ─────────────────────────────────────────────
+function openModal(id){document.getElementById(id).classList.add('open')}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open')}));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open'))});
+
+// ── REFRESH ALL ───────────────────────────────────────
+function refreshAll(){
+  updateBadges();
+  renderDashboard();
+}
+
+function updateBadges(){
+  const bks=(load(KEYS.bookings)||[]).filter(b=>b.status==='new').length;
+  const enqs=(load(KEYS.enquiries)||[]).filter(e=>!e.read).length;
+  document.getElementById('bkBadge').textContent=bks;
+  document.getElementById('enqBadge').textContent=enqs;
+  document.getElementById('notifDot').style.display=(bks+enqs>0)?'block':'none';
+}
+
+// ══════════════════════════════════════════════════════
+// DASHBOARD
+// ══════════════════════════════════════════════════════
+function renderDashboard(){
+  const bookings=load(KEYS.bookings)||[];
+  const enquiries=load(KEYS.enquiries)||[];
+  const reviews=load(KEYS.reviews)||[];
+  const builds=load(KEYS.builds)||[];
+
+  document.getElementById('dashStats').innerHTML=`
+    <div class="stat-card"><div class="sc-icon"><i class="fas fa-calendar-check"></i></div><div class="sc-val">${bookings.length}</div><div class="sc-lbl">Total Bookings</div><div class="sc-change up">↑ All Time</div></div>
+    <div class="stat-card"><div class="sc-icon"><i class="fas fa-envelope"></i></div><div class="sc-val">${enquiries.length}</div><div class="sc-lbl">Total Enquiries</div><div class="sc-change">${enquiries.filter(e=>!e.read).length} unread</div></div>
+    <div class="stat-card"><div class="sc-icon"><i class="fas fa-star"></i></div><div class="sc-val">${reviews.filter(r=>r.published).length}</div><div class="sc-lbl">Published Reviews</div><div class="sc-change">/ ${reviews.length} total</div></div>
+    <div class="stat-card"><div class="sc-icon"><i class="fas fa-car"></i></div><div class="sc-val">${builds.length}</div><div class="sc-lbl">Active Builds</div><div class="sc-change">On website</div></div>`;
+
+  // Activity feed from enquiries + bookings
+  const feed=document.getElementById('activityFeed');
+  const recent=[
+    ...bookings.slice(0,3).map(b=>({type:'booking',id:b.id,text:`<strong>Booking</strong> from ${b.name} — ${b.service}`,time:b.created,dot:'g'})),
+    ...enquiries.slice(0,3).map(e=>({type:'enq',id:e.id,text:`<strong>Enquiry</strong> from ${e.name} — ${e.service||'General'}`,time:e.created,dot:'b'}))
+  ].sort((a,b)=>new Date(b.time)-new Date(a.time)).slice(0,6);
+  feed.innerHTML=recent.length?recent.map(a=>`
+    <div class="act-item" ${a.type==='enq'?`onclick="showEnquiry(${a.id})" style="cursor:pointer;" title="Click to view enquiry"`:''}>
+      <div class="act-dot ${a.dot}"></div>
+      <div><div class="act-text">${a.text}</div><div class="act-time">${a.time}</div></div>
+    </div>`).join('')
+    :'<p style="color:var(--mid);font-family:var(--fc);letter-spacing:2px;font-size:12px;">No activity yet</p>';
+
+  // Dash enquiries preview
+  const enqBody=document.getElementById('dashEnquiries');
+  const latest=enquiries.slice(0,5);
+  enqBody.innerHTML=latest.length?latest.map(e=>`
+    <tr>
+      <td class="td-name">${e.name}</td>
+      <td>${e.service||'—'}</td><td>${e.car||'—'}</td>
+      <td><div class="message-cell" title="Click to view full message" onclick="showEnquiry(${e.id})">${(e.message||'').substring(0,60)}${e.message&&e.message.length>60?'…':''}</div></td>
+      <td>${e.created}</td>
+      <td><span class="badge ${e.read?'badge-done':'badge-new'}">${e.read?'Read':'New'}</span></td>
+    </tr>`).join('')
+    :'<tr><td colspan="6" style="text-align:center;color:var(--mid);font-family:var(--fc);letter-spacing:2px;padding:30px;">No enquiries yet</td></tr>';
+}
+
+// ══════════════════════════════════════════════════════
+// BOOKINGS
+// ══════════════════════════════════════════════════════
+let bkFilter='all';
+function renderBookings(){
+  const bookings=load(KEYS.bookings)||[];
+  const filtered=bkFilter==='all'?bookings:bookings.filter(b=>b.status===bkFilter);
+  const body=document.getElementById('bookingsBody');
+  body.innerHTML=filtered.length?filtered.map(b=>`
+    <tr>
+      <td>#BK-${String(b.id).slice(-4)}</td>
+      <td class="td-name">${b.name}</td>
+      <td>${b.phone||'—'}</td>
+      <td>${b.service}</td>
+      <td>${b.car||'—'}</td>
+      <td>${b.date||b.created}</td>
+      <td><span class="badge ${statusBadge(b.status)}">${statusLabel(b.status)}</span></td>
+      <td style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="btn btn-outline btn-sm" onclick="editBooking(${b.id})"><i class="fas fa-pen"></i></button>
+        <button class="btn btn-green btn-sm" onclick="setBookingStatus(${b.id},'done')">✓ Done</button>
+        <button class="btn btn-danger btn-sm" onclick="setBookingStatus(${b.id},'cancel')">✗</button>
+      </td>
+    </tr>`).join('')
+    :'<tr><td colspan="8" style="text-align:center;color:var(--mid);font-family:var(--fc);letter-spacing:2px;padding:30px;">NO BOOKINGS YET</td></tr>';
+  updateBadges();
+}
+function filterBk(f,btn){
+  bkFilter=f;
+  document.querySelectorAll('#page-bookings .btn-outline').forEach(b=>b.style.borderColor='');
+  if(btn){btn.style.borderColor='var(--red)';btn.style.color='var(--red)';}
+  renderBookings();
+}
+function statusBadge(s){return{new:'badge-new',open:'badge-open',done:'badge-done',cancel:'badge-cancel'}[s]||'badge-new'}
+function statusLabel(s){return{new:'New',open:'In Progress',done:'Completed',cancel:'Cancelled'}[s]||'New'}
+
+function addBooking(){
+  const name=document.getElementById('bk-name').value.trim();
+  if(!name){showToast('Name is required',true);return;}
+  const bks=load(KEYS.bookings)||[];
+  bks.unshift({
+    id:Date.now(),name,phone:document.getElementById('bk-phone').value,
+    service:document.getElementById('bk-service').value,car:document.getElementById('bk-car').value,
+    date:document.getElementById('bk-date').value,notes:document.getElementById('bk-notes').value,
+    status:'new',created:new Date().toLocaleString('en-IN')
+  });
+  save(KEYS.bookings,bks);
+  closeModal('modalAddBooking');
+  renderBookings(); renderDashboard();
+  showToast('Booking added successfully');
+  ['bk-name','bk-phone','bk-car','bk-date','bk-notes'].forEach(id=>document.getElementById(id).value='');
+}
+
+function editBooking(id){
+  const bks=load(KEYS.bookings)||[];
+  const b=bks.find(x=>x.id===id);
+  if(!b)return;
+  document.getElementById('ebk-id').value=id;
+  document.getElementById('ebk-name').value=b.name;
+  document.getElementById('ebk-phone').value=b.phone||'';
+  document.getElementById('ebk-service').value=b.service;
+  document.getElementById('ebk-car').value=b.car||'';
+  document.getElementById('ebk-status').value=b.status;
+  openModal('modalEditBooking');
+}
+function saveEditBooking(){
+  const id=parseInt(document.getElementById('ebk-id').value);
+  const bks=load(KEYS.bookings)||[];
+  const i=bks.findIndex(x=>x.id===id);
+  if(i<0)return;
+  bks[i].name=document.getElementById('ebk-name').value;
+  bks[i].phone=document.getElementById('ebk-phone').value;
+  bks[i].service=document.getElementById('ebk-service').value;
+  bks[i].car=document.getElementById('ebk-car').value;
+  bks[i].status=document.getElementById('ebk-status').value;
+  save(KEYS.bookings,bks);
+  closeModal('modalEditBooking');
+  renderBookings(); renderDashboard(); updateBadges();
+  showToast('Booking updated');
+}
+function setBookingStatus(id,status){
+  const bks=load(KEYS.bookings)||[];
+  const i=bks.findIndex(x=>x.id===id);
+  if(i<0)return;
+  bks[i].status=status;
+  save(KEYS.bookings,bks);
+  renderBookings(); renderDashboard(); updateBadges();
+  showToast(`Booking marked as ${statusLabel(status)}`);
+}
+
+// ══════════════════════════════════════════════════════
+// ENQUIRIES — reads what the contact form writes
+// ══════════════════════════════════════════════════════
+function renderEnquiries(){
+  const enqs=load(KEYS.enquiries)||[];
+  const body=document.getElementById('enquiriesBody');
+  const empty=document.getElementById('noEnquiries');
+  if(!enqs.length){body.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  body.innerHTML=enqs.map(e=>`
+    <tr>
+      <td class="td-name">${e.read?'':`<span class="unread-dot"></span>`}${e.name}</td>
+      <td>${e.phone||'—'}</td>
+      <td>${e.email||'—'}</td>
+      <td>${e.service||'—'}</td>
+      <td>${e.car||'—'}</td>
+      <td><div class="message-cell" title="Click to view full message" onclick="showEnquiry(${e.id})">${(e.message||'').substring(0,60)}${e.message&&e.message.length>60?'…':''}</div></td>
+      <td>${e.created}</td>
+      <td style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="btn btn-outline btn-sm" onclick="markRead(${e.id})"><i class="fas fa-check"></i> Read</button>
+        <button class="btn btn-green btn-sm" onclick="convertToBooking(${e.id})">→ Book</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteEnquiry(${e.id})"><i class="fas fa-trash"></i></button>
+      </td>
+    </tr>`).join('');
+  updateBadges();
+}
+function markRead(id){
+  const enqs=load(KEYS.enquiries)||[];
+  const i=enqs.findIndex(e=>e.id===id);
+  if(i<0)return;
+  enqs[i].read=true;
+  save(KEYS.enquiries,enqs);
+  renderEnquiries(); renderDashboard(); updateBadges();
+  showToast('Marked as read');
+}
+function showEnquiry(id){
+  const enqs=load(KEYS.enquiries)||[];
+  const e=enqs.find(x=>x.id===id);
+  if(!e)return;
+  document.getElementById('enq-view-name').textContent=e.name;
+  document.getElementById('enq-view-phone').textContent=e.phone||'—';
+  document.getElementById('enq-view-email').textContent=e.email||'—';
+  document.getElementById('enq-view-service').textContent=e.service||'—';
+  document.getElementById('enq-view-car').textContent=e.car||'—';
+  document.getElementById('enq-view-time').textContent='Received: '+e.created;
+  document.getElementById('enq-view-msg').textContent=e.message||'(No message content)';
+  document.getElementById('enq-view-status').innerHTML=`<span class="badge ${e.read?'badge-done':'badge-new'}">${e.read?'Read':'New'}</span>`;
+  document.getElementById('enq-view-btn-read').style.display=e.read?'none':'block';
+  document.getElementById('enq-view-btn-read').onclick=()=>{markRead(id); closeModal('modalViewEnquiry');};
+  document.getElementById('enq-view-btn-book').onclick=()=>{convertToBooking(id); closeModal('modalViewEnquiry');};
+  document.getElementById('enq-view-btn-del').onclick=()=>{deleteEnquiry(id); closeModal('modalViewEnquiry');};
+  openModal('modalViewEnquiry');
+}
+function deleteEnquiry(id){
+  if(!confirm('Delete this enquiry?'))return;
+  let enqs=load(KEYS.enquiries)||[];
+  enqs=enqs.filter(e=>e.id!==id);
+  save(KEYS.enquiries,enqs);
+  renderEnquiries(); renderDashboard(); updateBadges();
+  showToast('Enquiry deleted');
+}
+function convertToBooking(id){
+  let enqs=load(KEYS.enquiries)||[];
+  const e=enqs.find(x=>x.id===id);
+  if(!e)return;
+  const bks=load(KEYS.bookings)||[];
+  bks.unshift({
+    id:Date.now(),name:e.name,phone:e.phone,service:e.service||'General',
+    car:e.car||'—',date:'',notes:e.message,status:'new',created:new Date().toLocaleString('en-IN')
+  });
+  save(KEYS.bookings,bks);
+  
+  // Remove enquiry after converting
+  enqs = enqs.filter(x => x.id !== id);
+  save(KEYS.enquiries, enqs);
+  renderEnquiries();
+  renderDashboard();
+  updateBadges();
+
+  showToast(`Converted to booking for ${e.name}`);
+}
+
+// ══════════════════════════════════════════════════════
+// BUILDS — changes sync to website
+// ══════════════════════════════════════════════════════
+const ICONS=['fas fa-car','fas fa-car-crash','fas fa-car-side','fas fa-truck-monster','fas fa-tachometer-alt'];
+const BGS=['linear-gradient(135deg,#200505,#0e0e0e)','linear-gradient(135deg,#051a0a,#0e0e0e)','linear-gradient(135deg,#051015,#0e0e0e)','linear-gradient(135deg,#0a0518,#0e0e0e)','linear-gradient(135deg,#1a0800,#0e0e0e)'];
+
+function renderBuildsAdmin(){
+  const builds=load(KEYS.builds)||[];
+  const grid=document.getElementById('buildsGrid');
+  grid.innerHTML=builds.map(b=>`
+    <div class="item-box">
+      <div class="item-img" style="background:${b.bg||'var(--dark2)'}">${b.customBg ? '' : `<i class="${b.icon||'fas fa-car'}" style="color:rgba(255,255,255,.15);"></i>`}</div>
+      <div class="item-name">${b.make} ${b.car}</div>
+      <div class="item-sub">${b.type}</div>
+      <div class="item-actions">
+        <button class="btn btn-outline btn-sm" onclick="openEditBuild(${b.id})"><i class="fas fa-pen"></i> Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteBuild(${b.id})"><i class="fas fa-trash"></i></button>
+      </div>
+    </div>`).join('');
+}
+function openEditBuild(id){
+  const builds=load(KEYS.builds)||[];
+  const b=builds.find(x=>x.id===id);
+  if(!b)return;
+  document.getElementById('buildModalTitle').textContent='Edit Build';
+  document.getElementById('bd-id').value=id;
+  document.getElementById('bd-make').value=b.make;
+  document.getElementById('bd-car').value=b.car;
+  document.getElementById('bd-type').value=b.type;
+  document.getElementById('bd-desc').value=b.desc;
+  document.getElementById('bd-tags').value=(b.tags||[]).join(', ');
+  if(document.getElementById('bd-img')) document.getElementById('bd-img').value='';
+  openModal('modalAddBuild');
+}
+function saveBuild(){
+  const fileInput = document.getElementById('bd-img');
+  if(fileInput && fileInput.files && fileInput.files[0]) {
+    if(fileInput.files[0].size > 2000000) { showToast('Image too large (Max 2MB)', true); return; }
+    const reader = new FileReader();
+    reader.onload = function(e) { _finishSaveBuild(e.target.result); };
+    reader.readAsDataURL(fileInput.files[0]);
+  } else {
+    _finishSaveBuild(null);
+  }
+}
+
+function _finishSaveBuild(bgData){
+  const id=document.getElementById('bd-id').value;
+  const builds=load(KEYS.builds)||[];
+  const obj={
+    id:id?parseInt(id):Date.now(),
+    make:document.getElementById('bd-make').value.trim(),
+    car:document.getElementById('bd-car').value.trim(),
+    type:document.getElementById('bd-type').value.trim(),
+    desc:document.getElementById('bd-desc').value.trim(),
+    tags:document.getElementById('bd-tags').value.split(',').map(t=>t.trim()).filter(Boolean),
+    icon:ICONS[Math.floor(Math.random()*ICONS.length)],
+    bg:BGS[Math.floor(Math.random()*BGS.length)]
+  };
+  if(id){
+    const i=builds.findIndex(x=>x.id===parseInt(id));
+    if(i>=0){
+      obj.icon=builds[i].icon;
+      obj.bg=bgData ? `url(${bgData}) center/cover` : builds[i].bg;
+      obj.customBg=bgData ? true : builds[i].customBg;
+      builds[i]=obj;
+    }else builds.unshift(obj);
+  } else {
+    if(bgData){ obj.bg=`url(${bgData}) center/cover`; obj.customBg=true; }
+    builds.unshift(obj);
+  }
+  save(KEYS.builds,builds);
+  closeModal('modalAddBuild');
+  document.getElementById('bd-id').value='';
+  if(document.getElementById('bd-img')) document.getElementById('bd-img').value='';
+  document.getElementById('buildModalTitle').textContent='Add Build';
+  ['bd-make','bd-car','bd-type','bd-desc','bd-tags'].forEach(i=>document.getElementById(i).value='');
+  renderBuildsAdmin();
+  showToast('Build saved — website updated ✓');
+}
+function deleteBuild(id){
+  if(!confirm('Delete this build from the website?'))return;
+  let builds=load(KEYS.builds)||[];
+  builds=builds.filter(b=>b.id!==id);
+  save(KEYS.builds,builds);
+  renderBuildsAdmin();
+  showToast('Build removed from website');
+}
+
+// ══════════════════════════════════════════════════════
+// SERVICES — changes sync to website
+// ══════════════════════════════════════════════════════
+function renderServicesAdmin(){
+  const services=load(KEYS.services)||[];
+  document.getElementById('servicesBody').innerHTML=services.map((s,i)=>`
+    <tr>
+      <td>${i+1}</td>
+      <td class="td-name"><i class="${s.icon}" style="color:var(--red);margin-right:8px;"></i>${s.name}</td>
+      <td style="color:var(--mid);font-size:12px;max-width:200px;">${s.desc.substring(0,60)}…</td>
+      <td>
+        <button class="btn btn-sm ${s.visible?'btn-green':'btn-danger'}" onclick="toggleServiceVisibility(${s.id})">
+          <i class="fas fa-eye${s.visible?'':'-slash'}"></i> ${s.visible?'Visible':'Hidden'}
+        </button>
+      </td>
+      <td style="display:flex;gap:6px;">
+        <button class="btn btn-outline btn-sm" onclick="openEditService(${s.id})"><i class="fas fa-pen"></i> Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteService(${s.id})"><i class="fas fa-trash"></i></button>
+      </td>
+    </tr>`).join('');
+}
+function toggleServiceVisibility(id){
+  const svcs=load(KEYS.services)||[];
+  const i=svcs.findIndex(s=>s.id===id);
+  if(i<0)return;
+  svcs[i].visible=!svcs[i].visible;
+  save(KEYS.services,svcs);
+  renderServicesAdmin();
+  showToast(`Service ${svcs[i].visible?'shown on':'hidden from'} website`);
+}
+function openEditService(id){
+  const svcs=load(KEYS.services)||[];
+  const s=svcs.find(x=>x.id===id);
+  if(!s)return;
+  document.getElementById('svcModalTitle').textContent='Edit Service';
+  document.getElementById('sv-id').value=id;
+  document.getElementById('sv-name').value=s.name;
+  document.getElementById('sv-desc').value=s.desc;
+  document.getElementById('sv-icon').value=s.icon;
+  openModal('modalAddService');
+}
+function saveService(){
+  const id=document.getElementById('sv-id').value;
+  const svcs=load(KEYS.services)||[];
+  const obj={
+    id:id?parseInt(id):Date.now(),
+    name:document.getElementById('sv-name').value.trim(),
+    desc:document.getElementById('sv-desc').value.trim(),
+    icon:document.getElementById('sv-icon').value.trim()||'fas fa-wrench',
+    visible:true
+  };
+  if(id){const i=svcs.findIndex(x=>x.id===parseInt(id));if(i>=0){obj.visible=svcs[i].visible;svcs[i]=obj;}else svcs.push(obj);}
+  else svcs.push(obj);
+  save(KEYS.services,svcs);
+  closeModal('modalAddService');
+  document.getElementById('sv-id').value='';
+  document.getElementById('svcModalTitle').textContent='Add Service';
+  ['sv-name','sv-desc','sv-icon'].forEach(i=>document.getElementById(i).value='');
+  renderServicesAdmin();
+  showToast('Service saved — website updated ✓');
+}
+function deleteService(id){
+  if(!confirm('Remove this service from the website?'))return;
+  let svcs=load(KEYS.services)||[];
+  svcs=svcs.filter(s=>s.id!==id);
+  save(KEYS.services,svcs);
+  renderServicesAdmin();
+  showToast('Service removed from website');
+}
+
+// ══════════════════════════════════════════════════════
+// REVIEWS — changes sync to website
+// ══════════════════════════════════════════════════════
+function renderReviewsAdmin(){
+  const reviews=load(KEYS.reviews)||[];
+  document.getElementById('reviewsList').innerHTML=reviews.map(r=>`
+    <div class="rev-item">
+      <div class="rev-avatar">${r.name[0]}</div>
+      <div style="flex:1;">
+        <div class="rev-meta">
+          <div class="rev-name">${r.name}</div>
+          <div class="rev-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
+          <span class="badge ${r.published?'badge-done':'badge-hidden'}">${r.published?'Published':'Hidden'}</span>
+          <div class="rev-date">${r.source||'Google Review'}</div>
+        </div>
+        <div class="rev-text">"${r.text}"</div>
+        <div class="rev-actions">
+          <button class="btn btn-outline btn-sm" onclick="openEditReview(${r.id})"><i class="fas fa-pen"></i> Edit</button>
+          <button class="btn ${r.published?'btn-danger':'btn-green'} btn-sm" onclick="toggleReview(${r.id})">
+            <i class="fas fa-eye${r.published?'-slash':''}"></i> ${r.published?'Hide':'Publish'}
+          </button>
+          <button class="btn btn-danger btn-sm" onclick="deleteReview(${r.id})"><i class="fas fa-trash"></i></button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+function toggleReview(id){
+  const revs=load(KEYS.reviews)||[];
+  const i=revs.findIndex(r=>r.id===id);
+  if(i<0)return;
+  revs[i].published=!revs[i].published;
+  save(KEYS.reviews,revs);
+  renderReviewsAdmin(); renderDashboard();
+  showToast(`Review ${revs[i].published?'published on':'hidden from'} website`);
+}
+function openEditReview(id){
+  const revs=load(KEYS.reviews)||[];
+  const r=revs.find(x=>x.id===id);
+  if(!r)return;
+  document.getElementById('revModalTitle').textContent='Edit Review';
+  document.getElementById('rv-id').value=id;
+  document.getElementById('rv-name').value=r.name;
+  document.getElementById('rv-rating').value=r.rating;
+  document.getElementById('rv-text').value=r.text;
+  document.getElementById('rv-source').value=r.source;
+  openModal('modalAddReview');
+}
+function saveReview(){
+  const id=document.getElementById('rv-id').value;
+  const revs=load(KEYS.reviews)||[];
+  const obj={
+    id:id?parseInt(id):Date.now(),
+    name:document.getElementById('rv-name').value.trim(),
+    rating:parseInt(document.getElementById('rv-rating').value),
+    text:document.getElementById('rv-text').value.trim(),
+    source:document.getElementById('rv-source').value,
+    published:true
+  };
+  if(id){const i=revs.findIndex(x=>x.id===parseInt(id));if(i>=0){obj.published=revs[i].published;revs[i]=obj;}else revs.unshift(obj);}
+  else revs.unshift(obj);
+  save(KEYS.reviews,revs);
+  closeModal('modalAddReview');
+  document.getElementById('rv-id').value='';
+  document.getElementById('revModalTitle').textContent='Add Review';
+  ['rv-name','rv-text'].forEach(i=>document.getElementById(i).value='');
+  renderReviewsAdmin(); renderDashboard();
+  showToast('Review saved — website updated ✓');
+}
+function deleteReview(id){
+  if(!confirm('Delete this review?'))return;
+  let revs=load(KEYS.reviews)||[];
+  revs=revs.filter(r=>r.id!==id);
+  save(KEYS.reviews,revs);
+  renderReviewsAdmin(); renderDashboard();
+  showToast('Review deleted from website');
+}
+
+// ══════════════════════════════════════════════════════
+// GALLERY
+// ══════════════════════════════════════════════════════
+function renderGalleryAdmin(){
+  const gallery=load(KEYS.gallery)||[];
+  const grid=document.getElementById('galleryGrid');
+  grid.innerHTML=gallery.map(g=>`
+    <div class="item-box">
+      <div class="item-img" style="background:${g.bg||'var(--dark2)'}">${g.img||'<i class="fas fa-image"></i>'}</div>
+      <div class="item-name">${g.name}</div>
+      <div class="item-sub">${g.type||'Gallery Upload'}</div>
+      <div class="item-actions">
+        <button class="btn btn-danger btn-sm" onclick="deleteGalleryItem(${g.id})"><i class="fas fa-trash"></i> Remove</button>
+      </div>
+    </div>`).join('');
+}
+function triggerUpload(){document.getElementById('uploadInput').click();}
+function handleUpload(e){
+  const file=e.target.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(event){
+    const gallery=load(KEYS.gallery)||[];
+    gallery.unshift({
+      id:Date.now(),
+      img:`<img src="${event.target.result}" style="width:100%;height:100%;object-fit:cover;">`,
+      name:file.name.replace(/\.[^.]+$/,''),
+      type:'New Upload',
+      bg:'var(--dark2)'
+    });
+    save(KEYS.gallery,gallery);
+    renderGalleryAdmin();
+    showToast('Photo uploaded successfully');
+  };
+  reader.readAsDataURL(file);
+  e.target.value='';
+}
+function deleteGalleryItem(id){
+  if(!confirm('Remove this photo from the gallery?'))return;
+  let gallery=load(KEYS.gallery)||[];
+  gallery=gallery.filter(g=>g.id!==id);
+  save(KEYS.gallery,gallery);
+  renderGalleryAdmin();
+  showToast('Photo removed from website');
+}
+
+// ══════════════════════════════════════════════════════
+// SETTINGS
+// ══════════════════════════════════════════════════════
+function saveSettings(){
+  const s={
+    name:document.getElementById('s-name').value,phone:document.getElementById('s-phone').value,
+    address:document.getElementById('s-addr').value,email:document.getElementById('s-email').value,
+    whatsapp:document.getElementById('s-wa').value,
+    hours:{mf:document.getElementById('s-h1').value,sat:document.getElementById('s-h2').value,sun:document.getElementById('s-h3').value},
+    social:{ig:document.getElementById('s-ig').value,fb:document.getElementById('s-fb').value,yt:document.getElementById('s-yt').value,waLink:document.getElementById('s-walink').value}
+  };
+  save(KEYS.settings,s);
+  showToast('Settings saved successfully');
+}
+function changePassword(){
+  const cp=document.getElementById('s-cp').value;
+  const np=document.getElementById('s-np').value;
+  if(cp!==adminPass){showToast('Current password is incorrect',true);return;}
+  if(np.length<6){showToast('New password must be 6+ characters',true);return;}
+  adminPass=np;
+  document.getElementById('s-cp').value='';
+  document.getElementById('s-np').value='';
+  showToast('Password updated successfully');
+}
+
+// ══════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════
+seedIfEmpty();
+updateBadges();
+
+// Poll for new enquiries every 10 seconds (cross-tab live update)
+setInterval(()=>{updateBadges();},10000);
+
+// ── MOBILE SIDEBAR TOGGLE ─────────────────────────────
+(function(){
+  // Inject overlay div into app
+  const overlay=document.createElement('div');
+  overlay.className='sidebar-overlay';
+  overlay.id='sidebarOverlay';
+  overlay.addEventListener('click',closeSidebar);
+  document.getElementById('app').appendChild(overlay);
+
+  // Inject hamburger button into topbar-left
+  const tbLeft=document.querySelector('.tb-left');
+  const btn=document.createElement('span');
+  btn.className='mob-menu-btn';
+  btn.innerHTML='<i class="fas fa-bars"></i>';
+  btn.addEventListener('click',toggleSidebar);
+  tbLeft.insertBefore(btn,tbLeft.firstChild);
+})();
+
+function toggleSidebar(){
+  const sb=document.getElementById('sidebar');
+  const ov=document.getElementById('sidebarOverlay');
+  sb.classList.toggle('open');
+  ov.classList.toggle('visible');
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('visible');
+}
+// Close sidebar when a nav item is tapped on mobile
+document.querySelectorAll('.nav-item').forEach(item=>{
+  item.addEventListener('click',()=>{if(window.innerWidth<=768)closeSidebar();});
+});
+</script>
+</body>
+</html>
